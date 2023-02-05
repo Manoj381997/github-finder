@@ -4,18 +4,24 @@ import { useParams, Link } from 'react-router-dom';
 import Spinner from '../layout/Spinner';
 import RepoList from '../repos/RepoList';
 import GithubContext from '../../context/github/GithubContext';
+import { getUserRepos, getUser } from '../../context/github/GithubActions';
 
 function User() {
-  const { user, isLoading, getUser, repos, getUserRepos } =
-    useContext(GithubContext);
+  const { user, isLoading, dispatch, repos } = useContext(GithubContext);
 
   const params = useParams();
 
   useEffect(() => {
-    getUser(params.login);
-    getUserRepos(params.login);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    dispatch({ type: 'SET_LOADING' });
+    const getUserData = async () => {
+      const userData = await getUser(params.login);
+      dispatch({ type: 'GET_USER', payload: userData });
+      const userRepoData = await getUserRepos(params.login);
+      dispatch({ type: 'GET_REPOS', payload: userRepoData });
+    };
+    getUserData();
+    // // eslint-disable-next-line react-hooks/exhaustive-deps (needed when we dont pass anything in dependencies)
+  }, [dispatch, params.login]);
 
   if (isLoading) {
     return <Spinner />;
@@ -120,14 +126,14 @@ function User() {
           </div>
         </div>
 
-        <div className='w-full py-5 mb-6 rounded-lg shadow-md bg-base-100 bg-zinc-500 stats'>
-          <div className='grid grid-cols-1 md:grid-cols-3'>
+        <div className='w-full py-5 mb-6 rounded-lg shadow-lg bg-base-100 stats'>
+          <div className='grid grid-cols-1 md:grid-cols-2'>
             <div className='stat'>
               <div className='stat-figure text-secondary'>
                 <FaUsers className='text-3xl md:text-5xl' />
               </div>
-              <div className='stat-title pr-5 text-white'>Followers</div>
-              <div className='stat-value pr-5 text-3xl md:text-4xl text-white'>
+              <div className='stat-title pr-5'>Followers</div>
+              <div className='stat-value pr-5 text-3xl md:text-4xl'>
                 {followers}
               </div>
             </div>
