@@ -6,3 +6,8 @@
   border-radius: 0.5rem;
   opacity: 0.45;
 }
+
+footer a:hover {
+  color: deeppink;
+  cursor: pointer;
+}
